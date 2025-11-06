@@ -1,0 +1,8 @@
+project.ext.modID = "custommod"
+project.ext.modName = "Custom Mod"
+project.ext.modVersion = "1.0"
+project.ext.gameVersion = "1.0.2"
+project.ext.modDescription = "A custom mod"
+project.ext.author = "You"
+
+project.ext.clientside = false

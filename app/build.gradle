@@ -1,0 +1,166 @@
+plugins {
+    id 'java'
+}
+
+apply from: './config.gradle'
+
+def gameDirectory = "C:/Program Files (x86)/Steam/steamapps/common/Necesse"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation files(gameDirectory + "/Necesse.jar")
+    implementation fileTree(gameDirectory + "/lib/")
+    implementation fileTree("./mods/") // Add all mods located in local mods folder
+}
+
+// =================================================
+// ========== DO NOT EDIT BELOW THIS LINE ==========
+// =================================================
+
+// Name of the jar
+def jarName = "${project.ext.modName.replace(" ", "")}-${project.ext.gameVersion}-${project.ext.modVersion}"
+
+group project.ext.modID
+version project.ext.modVersion
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    libDepends
+}
+
+tasks.withType(Test).configureEach { enabled = false }
+
+sourceSets {
+    main {
+        output.resourcesDir = file("build/mod/resources/")
+        output.classesDirs.setFrom(file("build/classes/java/main/"))
+        compileClasspath += configurations.libDepends
+    }
+    remove(sourceSets.test)
+}
+
+def buildLocation = layout.buildDirectory.dir("jar")
+
+compileJava.options.encoding = "UTF-8"
+
+if (!file(gameDirectory + "/Necesse.jar").exists()) {
+    throw new Exception("Could not find game install directory. Make sure it is correct in build.gradle file.")
+}
+
+tasks.register("createAppID") {
+    group = "necesse"
+    description = "Creates steam_appid.txt file"
+
+    def appIdFile = layout.projectDirectory.file("steam_appid.txt")
+
+    outputs.file(appIdFile)
+
+    doLast {
+        appIdFile.asFile.text = "1169040"
+    }
+}
+
+tasks.register("createModInfoFile", JavaExec) {
+    group "necesse"
+    description "Creates the mod info file"
+
+    classpath = files(gameDirectory + "/Necesse.jar")
+
+    mainClass.set("CreateModInfoFile")
+    args "-file", "${sourceSets.main.output.classesDirs.singleFile}/mod.info",
+            "-id", "${project.ext.modID}",
+            "-name", "${project.ext.modName}",
+            "-version", "${project.ext.modVersion}",
+            "-gameVersion", "${project.ext.gameVersion}",
+            "-description", "${project.ext.modDescription}",
+            "-author", "${project.ext.author}",
+            "-clientside", "${project.ext.clientside}",
+            "-dependencies", project.ext.has("modDependencies") ? "[" + project.ext.modDependencies.join(", ") + "]" : "",
+            "-optionalDependencies", project.ext.has("modOptionalDependencies") ? "[" + project.ext.modOptionalDependencies.join(", ") + "]" : ""
+}
+// Makes compiling also create mod info file
+classes.dependsOn("createModInfoFile")
+
+tasks.register("runClient", JavaExec) {
+    group "necesse"
+    description "Run client with current mod"
+    dependsOn "buildModJar", "createAppID"
+
+    classpath = files(gameDirectory + "/Necesse.jar")
+
+    mainClass.set("StartSteamClient")
+    jvmArgs "-Xms512m", "-Xmx4G", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseG1GC", "-XX:G1NewSizePercent=20", "-XX:G1ReservePercent=20", "-XX:MaxGCPauseMillis=50", "-XX:G1HeapRegionSize=32M"
+    args "-dev", "-mod \"${buildLocation.get()}\""
+}
+
+tasks.register("runDevClient", JavaExec) {
+    group = "necesse"
+    description = "Run client with current mod"
+    dependsOn "buildModJar", "createAppID"
+
+    classpath = files(gameDirectory + "/Necesse.jar")
+
+    mainClass.set("StartSteamClient")
+    jvmArgs "-Xms512m", "-Xmx4G", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseG1GC", "-XX:G1NewSizePercent=20", "-XX:G1ReservePercent=20", "-XX:MaxGCPauseMillis=50", "-XX:G1HeapRegionSize=32M"
+    args "-dev 1", "-mod \"${buildLocation.get()}\""
+}
+
+tasks.register("runServer", JavaExec) {
+    group = "necesse"
+    description = "Run server with current mod"
+    dependsOn "buildModJar"
+
+    classpath = files(gameDirectory + "/Server.jar")
+
+    mainClass.set("StartDesktopServer")
+    jvmArgs "-Xms512m", "-Xmx4G", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseG1GC", "-XX:G1NewSizePercent=20", "-XX:G1ReservePercent=20", "-XX:MaxGCPauseMillis=50", "-XX:G1HeapRegionSize=32M"
+    args "-mod \"${buildLocation.get()}\""
+}
+
+tasks.register("buildModJar", Jar) {
+    group = "necesse"
+    description = "Generates the mod jar into the build folder"
+
+    dependsOn("classes")
+
+    def resources = layout.projectDirectory.dir("src/main/resources")
+
+    inputs.dir(resources)
+
+    doFirst {
+        buildLocation.get().asFileTree
+            .matching { exclude("${jarName}.jar") }
+            .files
+            .each { it.delete() }
+    }
+
+    // Add mod output
+    from(sourceSets.main.output.classesDirs) {
+        into("")
+    }
+
+    from(resources) {
+        into("resources")
+    }
+
+    // Add the dependencies
+    from {
+        configurations.libDepends.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+
+    archiveFileName.set("${jarName}.jar")
+    destinationDirectory.set(file(buildLocation))
+}
