@@ -132,7 +132,7 @@ tasks.register("buildModJar", Jar) {
     group = "necesse"
     description = "Generates the mod jar into the build folder"
 
-    dependsOn("classes")
+    dependsOn("classes", "createModInfoFile")
 
     def resources = layout.projectDirectory.dir("src/main/resources")
 

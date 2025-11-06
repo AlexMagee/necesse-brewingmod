@@ -1,0 +1,21 @@
+[object]
+fermenter=Fermenter
+
+[item]
+brewWine=Wine
+brewSake=Sake
+brewBeer=Beer
+brewMead=Mead
+brewCider=Cider
+
+[itemtooltip]
+fermentertip=Ferments fruits and grain into alcohol
+consumeeffecttip1=Decreases movement speed
+consumeeffecttip2=Decreases crit rate
+consumeeffecttip3=Increases melee damage
+
+[itemcategory]
+alcohol=Alcohol
+
+[buff]
+alcoholbuff=Drunk
