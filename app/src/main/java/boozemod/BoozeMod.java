@@ -13,6 +13,7 @@ public class BoozeMod {
     public void init() {
         // Register out objects
         ObjectRegistry.registerObject("fermenter", new FermenterObject(), 2, true);
+        ObjectRegistry.registerObject("still", new StillObject(), 2, true);
 
         ItemCategory.createCategory("B-F-A", "consumable", "alcohol");
         ItemCategory.craftingManager.createCategory("C-A-E", new String[]{"consumable", "alcohol"});
@@ -23,16 +24,17 @@ public class BoozeMod {
         ItemRegistry.registerItem("brewBeer", new AlcoholItem(1), 100, true);
         ItemRegistry.registerItem("brewMead", new AlcoholItem(1), 100, true);
         ItemRegistry.registerItem("brewCider", new AlcoholItem(1), 100, true);
-        // ItemRegistry.registerItem("rum", new AlcoholItem(1), 10, true);
-        // ItemRegistry.registerItem("whiskey", new AlcoholItem(1), 10, true);
-        // ItemRegistry.registerItem("vodka", new AlcoholItem(1), 10, true);
-        // ItemRegistry.registerItem("tequila", new AlcoholItem(1), 10, true);
+        ItemRegistry.registerItem("brewRum", new AlcoholItem(1), 10, true);
+        ItemRegistry.registerItem("brewTequila", new AlcoholItem(1), 10, true);
+        ItemRegistry.registerItem("brewVodka", new AlcoholItem(1), 10, true);
+        ItemRegistry.registerItem("brewWhiskey", new AlcoholItem(1), 10, true);
 
         // Register our buff
         BuffRegistry.registerBuff("alcoholbuff", new AlcoholBuff());
 
         // Register our recipe tech
         RecipeTechRegistry.registerTech("fermenter", "fermenter");
+        RecipeTechRegistry.registerTech("distillation", "distillation");
     }
 
     public void initResources() {
@@ -44,7 +46,7 @@ public class BoozeMod {
     }
 
     public void postInit() {
-        // Add recipes
+        // Fermentation
         Recipes.registerModRecipe(new Recipe(
                 "brewWine",
                 1,
@@ -109,8 +111,50 @@ public class BoozeMod {
                         new Ingredient("apple", 2)
                 }
         ));
+        // Distillation
+        Recipes.registerModRecipe(new Recipe(
+                "brewRum",
+                1,
+                RecipeTechRegistry.getTech("distillation"),
+                new Ingredient[]{
+                        new Ingredient("sugar", 2)
+                }
+        ));
+        Recipes.registerModRecipe(new Recipe(
+                "brewTequila",
+                1,
+                RecipeTechRegistry.getTech("distillation"),
+                new Ingredient[]{
+                        new Ingredient("cactussapling", 2)
+                }
+        ));
+        Recipes.registerModRecipe(new Recipe(
+                "brewVodka",
+                1,
+                RecipeTechRegistry.getTech("distillation"),
+                new Ingredient[]{
+                        new Ingredient("potato", 2)
+                }
+        ));
+        Recipes.registerModRecipe(new Recipe(
+                "brewWhiskey",
+                1,
+                RecipeTechRegistry.getTech("distillation"),
+                new Ingredient[]{
+                        new Ingredient("corn", 2)
+                }
+        ));
+        // Workstations
         Recipes.registerModRecipe(new Recipe(
                 "fermenter",
+                1,
+                RecipeTechRegistry.WORKSTATION,
+                new Ingredient[]{
+                        new Ingredient("copperbar", 10)
+                }
+        ));
+        Recipes.registerModRecipe(new Recipe(
+                "still",
                 1,
                 RecipeTechRegistry.WORKSTATION,
                 new Ingredient[]{

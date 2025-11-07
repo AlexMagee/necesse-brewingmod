@@ -1,5 +1,6 @@
 [object]
 fermenter=Fermenter
+still=Still
 
 [item]
 brewWine=Wine
@@ -7,9 +8,14 @@ brewSake=Sake
 brewBeer=Beer
 brewMead=Mead
 brewCider=Cider
+brewRum=Rum
+brewTequila=Tequila
+brewVodka=Vodka
+brewWhiskey=Whiskey
 
 [itemtooltip]
 fermentertip=Ferments fruits and grain into alcohol
+stilltip=Distills alcohol from ingredients
 consumeeffecttip1=Decreases movement speed
 consumeeffecttip2=Decreases crit rate
 consumeeffecttip3=Increases melee damage
