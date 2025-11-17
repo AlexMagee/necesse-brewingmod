@@ -1,6 +1,6 @@
 project.ext.modID = "maniacmagee.brewing"
 project.ext.modName = "Brewing Mod"
-project.ext.modVersion = "1.4"
+project.ext.modVersion = "1.5"
 project.ext.gameVersion = "1.0.2"
 project.ext.modDescription = "A mod that adds brewing to the game"
 project.ext.author = "ManiacMagee"
